@@ -1,0 +1,177 @@
+/* src/App.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700&display=swap');
+
+/* Global Styles */
+.App {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px 25px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: flex-start; /* Sol tarafa hizalama */
+  align-items: center;
+}
+
+/* Change Header Text */
+.change-header {
+  color: rgb(var(--wst-color-title));
+  font-family: 'Pacifico', cursive;
+  font-size: 2rem;
+  background-color: transparent;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  flex: 1;
+  padding: 25px;
+  gap: 25px;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 25px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  border-radius: 12px;
+}
+
+/* Sidebar Items - Standardized Size and Colors */
+.sidebar-item {
+  margin-bottom: 10px;
+  padding: 10px 15px; /* Reduced padding for narrower boxes */
+  border-radius: 16px; /* Consistent border-radius */
+  cursor: pointer;
+  color: #fff; /* Text color */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px; /* Reduced height for narrower boxes */
+  opacity: 0.65; /* Semi-transparent boxes */
+}
+
+/* Title Boxes - Blue Tone */
+.sidebar-item.title-box {
+  background-color: rgba(12, 229, 0, 0.8); /* DodgerBlue with transparency */
+}
+
+/* Subtitle Boxes - Green Tone */
+.sidebar-item.subtitle-box {
+  background-color: rgba(30, 144, 255, 0.8); /* LimeGreen with transparency */
+  margin-left: 20px; /* Indentation */
+}
+
+/* Sub-Subtitle Boxes - Pale Red Tone */
+.sidebar-item.subsubtitle-box {
+  background-color: rgba(255, 156, 44, 0.8); /* LightPink with transparency */
+  margin-left: 40px; /* Further Indentation */
+}
+
+/* Bolden the Context Header */
+.content-title {
+  text-align: center; /* Centers the title */
+  margin-bottom: 20px;
+  font-weight: bold; /* Bold text */
+  font-size: 1.5rem; /* Title size */
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Context Text Styling */
+.context-text {
+  font-family: 'Nunito', sans-serif; /* Applied Nunito font */
+  font-weight: normal; /* Normal font weight */
+}
+
+/* Hover Effects */
+.sidebar-item:hover {
+  opacity: 1; /* Fully opaque on hover */
+}
+
+.main-content {
+  flex: 1;
+  padding: 35px;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.context-container {
+  background-color: rgb(var(--wst-color-fill-background-primary));
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  font-family: 'Nunito', sans-serif; /* Added Nunito font */
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .sidebar {
+    width: 250px;
+    background-color: #f5f5f5;
+    padding: 10px;
+    overflow-y: auto;
+    height: 100vh;
+  }
+
+  .sidebar-item {
+    cursor: pointer;
+    margin-bottom: 4px;
+    height: 40px; /* Fixed height for all sidebar items */
+    display: flex;
+    align-items: center;
+    padding: 0 10px; /* Consistent horizontal padding */
+    border-radius: 4px;
+  }
+
+  .sidebar-item:hover {
+    background-color: #e0e0e0;
+  }
+
+  .title-box {
+    font-weight: bold;
+  }
+
+  .subtitle-box {
+    font-weight: 500;
+  }
+
+  .subsubtitle-box {
+    font-weight: normal;
+  }
+
+  .main-content {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 25px;
+  }
+
+  .change-header {
+    font-size: 1.5rem;
+  }
+
+  /* Adjust Indentation for Smaller Screens */
+  .subtitle-box {
+    margin-left: 15px;
+  }
+
+  .subsubtitle-box {
+    margin-left: 30px;
+  }
+}
