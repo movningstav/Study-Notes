@@ -9,6 +9,7 @@ import {
   updateDoc,
   setDoc,
   addDoc,
+  arrayUnion
 } from 'firebase/firestore';
 
 export const AppContext = createContext();
