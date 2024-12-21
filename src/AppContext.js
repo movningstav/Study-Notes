@@ -9,7 +9,8 @@ import {
   doc, 
   deleteDoc, 
   updateDoc, 
-  arrayUnion 
+  arrayUnion, 
+  onSnapshot 
 } from 'firebase/firestore';
 
 export const AppContext = createContext();
@@ -24,29 +25,28 @@ export const AppProvider = ({ children }) => {
     severity: 'success',
   });
 
-  // Fetch categories from Firestore on mount
+  // Real-time listener for categories
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
-        const categoriesList = [];
-        querySnapshot.forEach((doc) => {
-          categoriesList.push({ id: doc.id, ...doc.data() });
-        });
-        setCategories(categoriesList);
-        console.log("Categories fetched:", categoriesList);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-    fetchCategories();
+    const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const categoriesList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCategories(categoriesList);
+      console.log("Categories updated:", categoriesList);
+    }, (error) => {
+      console.error("Error fetching categories:", error);
+    });
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   // Function to delete a title
   const deleteTitle = async (id) => {
     try {
       await deleteDoc(doc(db, "categories", id));
-      setCategories(prevCategories => prevCategories.filter(category => category.id !== id));
+      // No need to manually update local state; listener will handle it
       console.log(`Title with ID ${id} deleted.`);
     } catch (error) {
       console.error("Error deleting title:", error);
@@ -60,34 +60,12 @@ export const AppProvider = ({ children }) => {
       await updateDoc(categoryRef, {
         subtitles: arrayUnion(subtitle)
       });
-
-      setCategories(prevCategories => prevCategories.map(cat => 
-        cat.id === categoryId 
-          ? { ...cat, subtitles: [...(cat.subtitles || []), subtitle] } 
-          : cat
-      ));
       console.log(`Subtitle "${subtitle}" added to category ${categoryId}.`);
+      // No need to manually update local state; listener will handle it
     } catch (error) {
       console.error("Error adding subtitle:", error);
     }
   };
-
-  // Save categories to Firestore whenever they change
-  useEffect(() => {
-    const saveCategoriesToFirestore = async () => {
-      try {
-        for (const category of categories) {
-          await setDoc(doc(db, "categories", category.id), category);
-        }
-        console.log("Categories saved to Firestore.");
-      } catch (error) {
-        console.error("Error saving categories:", error);
-      }
-    };
-    if (categories.length > 0) { // Avoid initial empty save
-      saveCategoriesToFirestore();
-    }
-  }, [categories]);
 
   const toggleEditPanel = () => {
     setIsEditPanelOpen((prev) => !prev);
