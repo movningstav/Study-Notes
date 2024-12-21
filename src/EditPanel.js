@@ -47,6 +47,7 @@ const EditPanel = () => {
     isEditPanelOpen,
     toggleEditPanel,
     showSnackbar,
+    deleteTitle, // Ensure deleteTitle is imported from context
   } = useContext(AppContext);
   const [tabValue, setTabValue] = useState('1');
 
@@ -630,7 +631,7 @@ const EditPanel = () => {
                   selectedSubtitleForSubSubtitle === ''
                 }
               >
-                {editingSubSubtitle ? 'Update Sub-Subtitle' : 'Add Sub-Subtitle'}
+                {editingSubSubtitle? 'Update Sub-Subtitle' : 'Add Sub-Subtitle'}
               </Button>
               {editingSubSubtitle && (
                 <Button
