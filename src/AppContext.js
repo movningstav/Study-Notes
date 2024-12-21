@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import { db } from './firebase';
 import {
   collection,
-  getDocs,
+  onSnapshot,
   doc,
   deleteDoc,
   updateDoc,
@@ -21,92 +21,73 @@ export const AppProvider = ({ children }) => {
     severity: 'success',
   });
 
-// ...existing code...
-
-// 1. Fetch categories from Firestore on mount (no auto-save to Firestore here)
-useEffect(() => {
-  const fetchCategories = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'categories'));
-      const fetchedCategories = [];
-      querySnapshot.forEach((docSnap) => {
-        fetchedCategories.push({ id: docSnap.id, ...docSnap.data() });
-      });
-      setCategories(fetchedCategories);
-    } catch (error) {
+  // 1. Real-time listener: keeps 'categories' in sync with Firestore
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'categories'), (snapshot) => {
+      const data = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+      setCategories(data);
+      console.log('Categories updated:', data);
+    }, (error) => {
       console.error('Error fetching categories:', error);
+    });
+
+    return () => unsubscribe(); // Clean up listener on unmount
+  }, []);
+
+  // 2. Delete Title (removes from Firestore; listener updates local state)
+  const deleteTitle = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'categories', id));
+      console.log(`Deleted title with ID: ${id}`);
+    } catch (error) {
+      console.error('Error deleting title:', error);
     }
   };
-  fetchCategories();
-}, []);
 
-// 2. Delete a title (remove from Firestore + local state)
-const deleteTitle = async (id) => {
-  try {
-    await deleteDoc(doc(db, 'categories', id));
-    setCategories((prev) => prev.filter((cat) => cat.id !== id));
-  } catch (error) {
-    console.error('Error deleting title:', error);
-  }
-};
+  // 3. Add a subtitle (updates Firestore; listener updates local state)
+  const addSubtitle = async (categoryId, newSubtitle) => {
+    try {
+      await updateDoc(doc(db, 'categories', categoryId), {
+        subtitles: arrayUnion(newSubtitle),
+      });
+      console.log(`Added subtitle "${newSubtitle}" to ${categoryId}`);
+    } catch (error) {
+      console.error('Error adding subtitle:', error);
+    }
+  };
 
-// 3. Add a subtitle (update Firestore + local state)
-const addSubtitle = async (categoryId, newSubtitle) => {
-  try {
-    const categoryRef = doc(db, 'categories', categoryId);
-    await updateDoc(categoryRef, {
-      subtitles: arrayUnion(newSubtitle),
-    });
-    setCategories((prev) =>
-      prev.map((cat) =>
-        cat.id === categoryId
-          ? {
-              ...cat,
-              subtitles: [...(cat.subtitles || []), newSubtitle],
-            }
-          : cat
-      )
-    );
-  } catch (error) {
-    console.error('Error adding subtitle:', error);
-  }
-};
+  const toggleEditPanel = () => {
+    setIsEditPanelOpen((prev) => !prev);
+  };
 
-// ...existing code...
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
-const toggleEditPanel = () => {
-  setIsEditPanelOpen((prev) => !prev);
-};
+  const closeSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
-const showSnackbar = (message, severity = 'success') => {
-  setSnackbar({
-    open: true,
-    message,
-    severity,
-  });
-};
-
-const closeSnackbar = () => {
-  setSnackbar((prev) => ({ ...prev, open: false }));
-};
-
-return (
-  <AppContext.Provider
-    value={{
-      categories,
-      setCategories,
-      deleteTitle,
-      addSubtitle,
-      selectedContent,
-      setSelectedContent,
-      isEditPanelOpen,
-      toggleEditPanel,
-      snackbar,
-      showSnackbar,
-      closeSnackbar,
-    }}
-  >
-    {children}
-  </AppContext.Provider>
-);
+  return (
+    <AppContext.Provider
+      value={{
+        categories,
+        setCategories,
+        deleteTitle,
+        addSubtitle,
+        selectedContent,
+        setSelectedContent,
+        isEditPanelOpen,
+        toggleEditPanel,
+        snackbar,
+        showSnackbar,
+        closeSnackbar,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 };
