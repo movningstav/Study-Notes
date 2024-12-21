@@ -1,5 +1,3 @@
-// src/AppContext.js
-
 import React, { createContext, useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
@@ -19,12 +17,17 @@ export const AppProvider = ({ children }) => {
   // Fetch categories from Firestore on mount
   useEffect(() => {
     const fetchCategories = async () => {
-      const querySnapshot = await getDocs(collection(db, "categories"));
-      const categoriesList = [];
-      querySnapshot.forEach((doc) => {
-        categoriesList.push(doc.data());
-      });
-      setCategories(categoriesList);
+      try {
+        const querySnapshot = await getDocs(collection(db, "categories"));
+        const categoriesList = [];
+        querySnapshot.forEach((doc) => {
+          categoriesList.push({ id: doc.id, ...doc.data() });
+        });
+        setCategories(categoriesList);
+        console.log("Categories fetched:", categoriesList);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     };
     fetchCategories();
   }, []);
@@ -32,11 +35,18 @@ export const AppProvider = ({ children }) => {
   // Save categories to Firestore whenever they change
   useEffect(() => {
     const saveCategoriesToFirestore = async () => {
-      categories.forEach(async (category) => {
-        await setDoc(doc(db, "categories", category.id.toString()), category);
-      });
+      try {
+        categories.forEach(async (category) => {
+          await setDoc(doc(db, "categories", category.id), category);
+        });
+        console.log("Categories saved to Firestore.");
+      } catch (error) {
+        console.error("Error saving categories:", error);
+      }
     };
-    saveCategoriesToFirestore();
+    if (categories.length > 0) { // Avoid initial empty save
+      saveCategoriesToFirestore();
+    }
   }, [categories]);
 
   const toggleEditPanel = () => {
