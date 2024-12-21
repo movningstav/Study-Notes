@@ -73,7 +73,7 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // 4. Add a New Title (Optional: If you need to add new titles)
+  // 4. Add a New Title (Optional: If you need to add new titles dynamically)
   const addTitle = async (title, context) => {
     try {
       const newCategory = {
