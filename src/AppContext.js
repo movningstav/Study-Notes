@@ -7,9 +7,8 @@ import {
   doc,
   deleteDoc,
   updateDoc,
-  arrayUnion,
+  setDoc,
   addDoc,
-  getDoc,
 } from 'firebase/firestore';
 
 export const AppContext = createContext();
@@ -24,24 +23,44 @@ export const AppProvider = ({ children }) => {
     severity: 'success',
   });
 
-  // Real-time listener
+  // Real-time listener for categories
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, 'categories'),
       (snapshot) => {
-        const data = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
         }));
         setCategories(data);
+        console.log('Data received from Firestore:', data); // Debug log
       },
       (error) => {
         console.error('Error fetching categories:', error);
+        showSnackbar('Error fetching data from Firestore', 'error');
       }
     );
 
     return () => unsubscribe();
   }, []);
+
+  const addTitle = async (title, context = '') => {
+    try {
+      const newCategory = {
+        title,
+        context,
+        subtitles: [],
+        createdAt: new Date().toISOString(),
+      };
+      
+      const docRef = await addDoc(collection(db, 'categories'), newCategory);
+      console.log('Document written with ID: ', docRef.id); // Debug log
+      showSnackbar('Category added successfully!', 'success');
+    } catch (error) {
+      console.error('Error adding new title:', error);
+      showSnackbar('Error adding category', 'error');
+    }
+  };
 
   const deleteTitle = async (id) => {
     try {
@@ -53,41 +72,35 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const addSubtitle = async (categoryId, subtitleContext) => {
+  const updateCategory = async (categoryId, updatedData) => {
     try {
-      const newSubtitle = {
-        id: Date.now().toString(),
-        context: subtitleContext,
-        subSubtitles: [],
-      };
-      const categoryDocRef = doc(db, 'categories', categoryId);
-      const categoryDoc = await getDoc(categoryDocRef);
-      if (categoryDoc.exists()) {
-        const categoryData = categoryDoc.data();
-        categoryData.subtitles.push(newSubtitle);
-        await updateDoc(categoryDocRef, categoryData);
-        showSnackbar('Subtitle added successfully!', 'success');
-      } else {
-        showSnackbar('Category not found', 'error');
-      }
+      const categoryRef = doc(db, 'categories', categoryId);
+      await updateDoc(categoryRef, updatedData);
+      showSnackbar('Category updated successfully!', 'success');
     } catch (error) {
-      console.error(`Error adding subtitle to category ID ${categoryId}:`, error);
-      showSnackbar('Error adding subtitle', 'error');
+      console.error('Error updating category:', error);
+      showSnackbar('Error updating category', 'error');
     }
   };
 
-  const addTitle = async (title, context) => {
+  const addSubtitle = async (categoryId, subtitleData) => {
     try {
-      const newCategory = {
-        title,
-        context,
-        subtitles: [],
+      const categoryRef = doc(db, 'categories', categoryId);
+      const newSubtitle = {
+        id: Date.now().toString(),
+        ...subtitleData,
+        subSubtitles: [],
+        createdAt: new Date().toISOString(),
       };
-      await addDoc(collection(db, 'categories'), newCategory);
-      showSnackbar('Category added successfully!', 'success');
+
+      await updateDoc(categoryRef, {
+        subtitles: arrayUnion(newSubtitle)
+      });
+      
+      showSnackbar('Subtitle added successfully!', 'success');
     } catch (error) {
-      console.error('Error adding new title:', error);
-      showSnackbar('Error adding category', 'error');
+      console.error('Error adding subtitle:', error);
+      showSnackbar('Error adding subtitle', 'error');
     }
   };
 
@@ -115,6 +128,7 @@ export const AppProvider = ({ children }) => {
         deleteTitle,
         addSubtitle,
         addTitle,
+        updateCategory,
         selectedContent,
         setSelectedContent,
         isEditPanelOpen,
