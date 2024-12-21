@@ -1,7 +1,8 @@
 // src/AppContext.js
 
 import React, { createContext, useState, useEffect } from 'react';
-import { getCategories, saveCategories } from './db'; // Ensure correct import path
+import { db } from './firebase';
+import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
 
 export const AppContext = createContext();
 
@@ -15,34 +16,27 @@ export const AppProvider = ({ children }) => {
     severity: 'success',
   });
 
-  // Load data from IndexedDB on mount
+  // Fetch categories from Firestore on mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const storedCategories = await getCategories();
-        if (storedCategories.length > 0) {
-          setCategories(storedCategories);
-          console.log('Data loaded from IndexedDB:', storedCategories);
-        } else {
-          console.log('No data found in IndexedDB.');
-        }
-      } catch (error) {
-        console.error('Failed to load data from IndexedDB:', error);
-      }
+    const fetchCategories = async () => {
+      const querySnapshot = await getDocs(collection(db, "categories"));
+      const categoriesList = [];
+      querySnapshot.forEach((doc) => {
+        categoriesList.push(doc.data());
+      });
+      setCategories(categoriesList);
     };
-    fetchData();
+    fetchCategories();
   }, []);
 
-  // Save data to IndexedDB whenever categories change
+  // Save categories to Firestore whenever they change
   useEffect(() => {
-    const saveData = async () => {
-      try {
-        await saveCategories(categories);
-      } catch (error) {
-        console.error('Failed to save data to IndexedDB:', error);
-      }
+    const saveCategoriesToFirestore = async () => {
+      categories.forEach(async (category) => {
+        await setDoc(doc(db, "categories", category.id.toString()), category);
+      });
     };
-    saveData();
+    saveCategoriesToFirestore();
   }, [categories]);
 
   const toggleEditPanel = () => {
