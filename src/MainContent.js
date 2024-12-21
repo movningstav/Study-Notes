@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 import { Box, Typography, IconButton, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ReactQuill from 'react-quill-new';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 const MainContent = () => {
   const { selectedContent, setCategories, categories, showSnackbar } = useContext(AppContext);
