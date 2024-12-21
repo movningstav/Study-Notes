@@ -1,3 +1,5 @@
+// src/MainContent.js
+
 import React, { useContext, useState } from 'react';
 import { AppContext } from './AppContext';
 import DOMPurify from 'dompurify';
@@ -6,12 +8,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
-function MainContent() {
+function Editor() {
   return (
     <ReactQuill theme="snow" />
   );
 }
-
+export default Editor;
 
 const MainContent = () => {
   const { selectedContent, setCategories, categories, showSnackbar } = useContext(AppContext);
@@ -37,7 +39,7 @@ const MainContent = () => {
       // Check if selected content is Subtitle
       if (selectedContent.type === 'subtitle') {
         const updatedSubtitles = cat.subtitles.map((sub) =>
-          sub.id === selectedContent.id ? { ...sub, subcontext: editedContext } : sub
+          sub.id === selectedContent.id ? { ...sub, context: editedContext } : sub
         );
         return { ...cat, subtitles: updatedSubtitles };
       }
