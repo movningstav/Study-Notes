@@ -24,13 +24,13 @@ export const AppProvider = ({ children }) => {
     severity: 'success',
   });
 
-  // 1. Real-time listener: keeps 'categories' in sync with Firestore
+  // 1. Real-time listener: Keeps 'categories' in sync with Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, 'categories'),
       (snapshot) => {
         const data = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id, // Firestore's document ID
+          id: docSnap.id, // Firestore's auto-generated document ID
           ...docSnap.data(),
         }));
         setCategories(data);
@@ -41,25 +41,28 @@ export const AppProvider = ({ children }) => {
       }
     );
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   // 2. Delete Title (removes from Firestore; listener updates local state)
   const deleteTitle = async (id) => {
     try {
+      console.log(`Attempting to delete title with ID: ${id}`);
       await deleteDoc(doc(db, 'categories', id));
       console.log(`Deleted title with ID: ${id}`);
       // No need to manually update local state; listener handles it
     } catch (error) {
-      console.error('Error deleting title:', error);
+      console.error(`Error deleting title with ID ${id}:`, error);
     }
   };
 
-  // 3. Add a Subtitle (adds a subtitle object to Firestore; listener updates local state)
+  // 3. Add Subtitle (adds a subtitle object to Firestore; listener updates local state)
   const addSubtitle = async (categoryId, subtitleContext) => {
     try {
+      console.log(`Attempting to add subtitle "${subtitleContext}" to category ID: ${categoryId}`);
       const newSubtitle = {
-        id: Date.now().toString(), // Generate a unique ID for the subtitle
+        id: Date.now().toString(), // Generates a unique ID based on the current timestamp
         context: subtitleContext,
         subSubtitles: [], // Initialize with an empty array if needed
       };
@@ -69,13 +72,14 @@ export const AppProvider = ({ children }) => {
       console.log(`Added subtitle "${subtitleContext}" to category ID: ${categoryId}`);
       // Listener will update the local state
     } catch (error) {
-      console.error('Error adding subtitle:', error);
+      console.error(`Error adding subtitle "${subtitleContext}" to category ID ${categoryId}:`, error);
     }
   };
 
-  // 4. Add a New Title (Optional: If you need to add new titles dynamically)
+  // Optional: Function to add a new title/category
   const addTitle = async (title, context) => {
     try {
+      console.log(`Attempting to add new title "${title}" with context "${context}"`);
       const newCategory = {
         title,
         context,
@@ -85,7 +89,7 @@ export const AppProvider = ({ children }) => {
       console.log(`Added new title "${title}" with ID: ${docRef.id}`);
       // Listener will update the local state
     } catch (error) {
-      console.error('Error adding title:', error);
+      console.error('Error adding new title:', error);
     }
   };
 
@@ -94,7 +98,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
   };
 
   const closeSnackbar = () => {
