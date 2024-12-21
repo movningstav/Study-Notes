@@ -1,6 +1,16 @@
+// src/AppContext.js
+
 import React, { createContext, useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
+import { 
+  collection, 
+  getDocs, 
+  setDoc, 
+  doc, 
+  deleteDoc, 
+  updateDoc, 
+  arrayUnion 
+} from 'firebase/firestore';
 
 export const AppContext = createContext();
 
@@ -32,13 +42,43 @@ export const AppProvider = ({ children }) => {
     fetchCategories();
   }, []);
 
+  // Function to delete a title
+  const deleteTitle = async (id) => {
+    try {
+      await deleteDoc(doc(db, "categories", id));
+      setCategories(prevCategories => prevCategories.filter(category => category.id !== id));
+      console.log(`Title with ID ${id} deleted.`);
+    } catch (error) {
+      console.error("Error deleting title:", error);
+    }
+  };
+
+  // Function to add a subtitle
+  const addSubtitle = async (categoryId, subtitle) => {
+    try {
+      const categoryRef = doc(db, "categories", categoryId);
+      await updateDoc(categoryRef, {
+        subtitles: arrayUnion(subtitle)
+      });
+
+      setCategories(prevCategories => prevCategories.map(cat => 
+        cat.id === categoryId 
+          ? { ...cat, subtitles: [...(cat.subtitles || []), subtitle] } 
+          : cat
+      ));
+      console.log(`Subtitle "${subtitle}" added to category ${categoryId}.`);
+    } catch (error) {
+      console.error("Error adding subtitle:", error);
+    }
+  };
+
   // Save categories to Firestore whenever they change
   useEffect(() => {
     const saveCategoriesToFirestore = async () => {
       try {
-        categories.forEach(async (category) => {
+        for (const category of categories) {
           await setDoc(doc(db, "categories", category.id), category);
-        });
+        }
         console.log("Categories saved to Firestore.");
       } catch (error) {
         console.error("Error saving categories:", error);
@@ -70,6 +110,8 @@ export const AppProvider = ({ children }) => {
       value={{
         categories,
         setCategories,
+        deleteTitle,      // Exposed deleteTitle function
+        addSubtitle,     // Exposed addSubtitle function
         selectedContent,
         setSelectedContent,
         isEditPanelOpen,
