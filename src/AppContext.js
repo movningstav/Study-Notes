@@ -1,5 +1,4 @@
 // src/AppContext.js
-
 import React, { createContext, useState, useEffect } from 'react';
 import { db } from './firebase';
 import {
@@ -10,6 +9,7 @@ import {
   updateDoc,
   arrayUnion,
   addDoc,
+  getDoc,
 } from 'firebase/firestore';
 
 export const AppContext = createContext();
@@ -34,7 +34,6 @@ export const AppProvider = ({ children }) => {
           ...docSnap.data(),
         }));
         setCategories(data);
-        console.log('Categories updated:', data);
       },
       (error) => {
         console.error('Error fetching categories:', error);
@@ -61,10 +60,16 @@ export const AppProvider = ({ children }) => {
         context: subtitleContext,
         subSubtitles: [],
       };
-      await updateDoc(doc(db, 'categories', categoryId), {
-        subtitles: arrayUnion(newSubtitle),
-      });
-      showSnackbar('Subtitle added successfully!', 'success');
+      const categoryDocRef = doc(db, 'categories', categoryId);
+      const categoryDoc = await getDoc(categoryDocRef);
+      if (categoryDoc.exists()) {
+        const categoryData = categoryDoc.data();
+        categoryData.subtitles.push(newSubtitle);
+        await updateDoc(categoryDocRef, categoryData);
+        showSnackbar('Subtitle added successfully!', 'success');
+      } else {
+        showSnackbar('Category not found', 'error');
+      }
     } catch (error) {
       console.error(`Error adding subtitle to category ID ${categoryId}:`, error);
       showSnackbar('Error adding subtitle', 'error');
