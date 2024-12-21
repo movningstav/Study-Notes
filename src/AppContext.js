@@ -58,21 +58,22 @@ export const AppProvider = ({ children }) => {
   };
 
   // 3. Add Subtitle (adds a subtitle object to Firestore; listener updates local state)
-  const addSubtitle = async (categoryId, subtitleContext) => {
+  const addSubtitle = async (categoryId, subtitleTitle, subtitleContext) => {
     try {
-      console.log(`Attempting to add subtitle "${subtitleContext}" to category ID: ${categoryId}`);
+      console.log(`Attempting to add subtitle "${subtitleTitle}" to category ID: ${categoryId}`);
       const newSubtitle = {
         id: Date.now().toString(), // Generates a unique ID based on the current timestamp
+        title: subtitleTitle,
         context: subtitleContext,
         subSubtitles: [], // Initialize with an empty array if needed
       };
       await updateDoc(doc(db, 'categories', categoryId), {
         subtitles: arrayUnion(newSubtitle),
       });
-      console.log(`Added subtitle "${subtitleContext}" to category ID: ${categoryId}`);
+      console.log(`Added subtitle "${subtitleTitle}" to category ID: ${categoryId}`);
       // Listener will update the local state
     } catch (error) {
-      console.error(`Error adding subtitle "${subtitleContext}" to category ID ${categoryId}:`, error);
+      console.error(`Error adding subtitle "${subtitleTitle}" to category ID ${categoryId}:`, error);
     }
   };
 

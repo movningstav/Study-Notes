@@ -7,13 +7,8 @@ import { Box, Typography, IconButton, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-
-function Editor() {
-  return (
-    <ReactQuill theme="snow" />
-  );
-}
-export default Editor;
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from './firebase';
 
 const MainContent = () => {
   const { selectedContent, setCategories, categories, showSnackbar } = useContext(AppContext);
@@ -61,6 +56,19 @@ const MainContent = () => {
     setCategories(updatedCategories);
     setIsEditing(false);
     showSnackbar('Context updated successfully!', 'success');
+
+    // Persist changes to Firestore
+    updateCategoriesInFirestore(updatedCategories);
+  };
+
+  const updateCategoriesInFirestore = async (updatedCategories) => {
+    try {
+      for (const category of updatedCategories) {
+        await updateDoc(doc(db, 'categories', category.id), category);
+      }
+    } catch (error) {
+      console.error('Error updating categories in Firestore:', error);
+    }
   };
 
   const handleCancel = () => {
