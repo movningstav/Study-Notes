@@ -6,6 +6,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
+function Editor() {
+  return (
+    <ReactQuill theme="snow" />
+  );
+}
+export default Editor;
+
 const MainContent = () => {
   const { selectedContent, setCategories, categories, showSnackbar } = useContext(AppContext);
   const [isEditing, setIsEditing] = useState(false);
