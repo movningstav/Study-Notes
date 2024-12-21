@@ -27,7 +27,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Draggable from 'react-draggable';
 import { TabPanel, TabContext } from '@mui/lab';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 function PaperComponent(props) {
   return (
