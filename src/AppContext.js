@@ -66,6 +66,7 @@ export const AppProvider = ({ children }) => {
   // Enhanced deleteTitle function with error logging
   const deleteTitle = async (id) => {
     try {
+      console.log('Deleting title with ID:', id); // Debug log
       await deleteDoc(doc(db, 'categories', id));
       showSnackbar('Category deleted successfully!', 'success');
     } catch (error) {

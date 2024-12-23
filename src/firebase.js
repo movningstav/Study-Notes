@@ -1,7 +1,6 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-// import { getAnalytics } from "firebase/analytics"; // Uncomment if using Analytics
 
 // Your new Firebase configuration
 const firebaseConfig = {
@@ -19,6 +18,3 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
 export const db = getFirestore(app);
-
-// Initialize Analytics (optional)
-// const analytics = getAnalytics(app);
