@@ -1,4 +1,3 @@
-// src/AppContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import { db } from './firebase';
 import {
@@ -7,7 +6,6 @@ import {
   doc,
   deleteDoc,
   updateDoc,
-  setDoc,
   addDoc,
   arrayUnion
 } from 'firebase/firestore';
@@ -73,13 +71,13 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const updateCategory = async (categoryId, updatedData) => {
+  const updateCategoryContext = async (categoryId, newContext) => {
     try {
       const categoryRef = doc(db, 'categories', categoryId);
-      await updateDoc(categoryRef, updatedData);
-      showSnackbar('Category updated successfully!', 'success');
+      await updateDoc(categoryRef, { context: newContext });
+      showSnackbar('Category context updated successfully!', 'success');
     } catch (error) {
-      console.error('Error updating category:', error);
+      console.error('Error updating category context:', error);
       showSnackbar('Error updating category', 'error');
     }
   };
@@ -129,7 +127,7 @@ export const AppProvider = ({ children }) => {
         deleteTitle,
         addSubtitle,
         addTitle,
-        updateCategory,
+        updateCategoryContext,
         selectedContent,
         setSelectedContent,
         isEditPanelOpen,

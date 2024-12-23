@@ -1,5 +1,3 @@
-// src/MainContent.js
-
 import React, { useContext, useState } from 'react';
 import { AppContext } from './AppContext';
 import DOMPurify from 'dompurify';
@@ -7,11 +5,9 @@ import { Box, Typography, IconButton, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from './firebase';
 
 const MainContent = () => {
-  const { selectedContent, setCategories, categories, showSnackbar } = useContext(AppContext);
+  const { selectedContent, updateCategoryContext, showSnackbar } = useContext(AppContext);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContext, setEditedContext] = useState('');
 
@@ -22,53 +18,16 @@ const MainContent = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedContent) return;
 
-    const updatedCategories = categories.map((cat) => {
-      // Check if selected content is Category
-      if (selectedContent.type === 'category' && cat.id === selectedContent.id) {
-        return { ...cat, context: editedContext };
-      }
+    if (selectedContent.type === 'category') {
+      await updateCategoryContext(selectedContent.id, editedContext);
+    }
+    // Handle other types (subtitle, subsubtitle) similarly if needed
 
-      // Check if selected content is Subtitle
-      if (selectedContent.type === 'subtitle') {
-        const updatedSubtitles = cat.subtitles.map((sub) =>
-          sub.id === selectedContent.id ? { ...sub, context: editedContext } : sub
-        );
-        return { ...cat, subtitles: updatedSubtitles };
-      }
-
-      // Check if selected content is Sub-Subtitle
-      if (selectedContent.type === 'subsubtitle') {
-        const updatedSubtitles = cat.subtitles.map((sub) => {
-          const updatedSubSubtitles = sub.subSubtitles.map((subSub) =>
-            subSub.id === selectedContent.id ? { ...subSub, context: editedContext } : subSub
-          );
-          return { ...sub, subSubtitles: updatedSubSubtitles };
-        });
-        return { ...cat, subtitles: updatedSubtitles };
-      }
-
-      return cat;
-    });
-
-    setCategories(updatedCategories);
     setIsEditing(false);
     showSnackbar('Context updated successfully!', 'success');
-
-    // Persist changes to Firestore
-    updateCategoriesInFirestore(updatedCategories);
-  };
-
-  const updateCategoriesInFirestore = async (updatedCategories) => {
-    try {
-      for (const category of updatedCategories) {
-        await updateDoc(doc(db, 'categories', category.id), category);
-      }
-    } catch (error) {
-      console.error('Error updating categories in Firestore:', error);
-    }
   };
 
   const handleCancel = () => {
