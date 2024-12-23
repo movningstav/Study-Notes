@@ -17,22 +17,4 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const addTitle = async (title, context = '') => {
-  try {
-    const newCategory = {
-      title,
-      context,
-      subtitles: [],
-      createdAt: new Date().toISOString(),
-    };
-    
-    const docRef = await addDoc(collection(db, 'categories'), newCategory);
-    console.log('Document written with ID: ', docRef.id);
-    showSnackbar('Category added successfully!', 'success');
-  } catch (error) {
-    console.error('Error adding new title:', error);
-    showSnackbar(`Error adding category: ${error.message}`, 'error');
-  }
-};
-
 export { db };
