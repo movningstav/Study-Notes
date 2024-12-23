@@ -1,3 +1,4 @@
+// src/MainContent.js
 import React, { useContext, useState } from 'react';
 import { AppContext } from './AppContext';
 import DOMPurify from 'dompurify';

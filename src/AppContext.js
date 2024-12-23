@@ -1,3 +1,4 @@
+// src/AppContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import { db } from './firebase';
 import {
