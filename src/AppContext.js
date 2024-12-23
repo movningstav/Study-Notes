@@ -43,6 +43,7 @@ export const AppProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // Enhanced addTitle function with error logging
   const addTitle = async (title, context = '') => {
     try {
       const newCategory = {
@@ -57,20 +58,22 @@ export const AppProvider = ({ children }) => {
       showSnackbar('Category added successfully!', 'success');
     } catch (error) {
       console.error('Error adding new title:', error);
-      showSnackbar('Error adding category', 'error');
+      showSnackbar(`Error adding category: ${error.message}`, 'error');
     }
   };
 
+  // Enhanced deleteTitle function with error logging
   const deleteTitle = async (id) => {
     try {
       await deleteDoc(doc(db, 'categories', id));
       showSnackbar('Category deleted successfully!', 'success');
     } catch (error) {
       console.error(`Error deleting title with ID ${id}:`, error);
-      showSnackbar('Error deleting category', 'error');
+      showSnackbar(`Error deleting category: ${error.message}`, 'error');
     }
   };
 
+  // Enhanced updateCategoryContext function with error logging
   const updateCategoryContext = async (categoryId, newContext) => {
     try {
       const categoryRef = doc(db, 'categories', categoryId);
@@ -78,10 +81,11 @@ export const AppProvider = ({ children }) => {
       showSnackbar('Category context updated successfully!', 'success');
     } catch (error) {
       console.error('Error updating category context:', error);
-      showSnackbar('Error updating category', 'error');
+      showSnackbar(`Error updating category: ${error.message}`, 'error');
     }
   };
 
+  // Enhanced addSubtitle function with error logging
   const addSubtitle = async (categoryId, subtitleData) => {
     try {
       const categoryRef = doc(db, 'categories', categoryId);
@@ -99,7 +103,7 @@ export const AppProvider = ({ children }) => {
       showSnackbar('Subtitle added successfully!', 'success');
     } catch (error) {
       console.error('Error adding subtitle:', error);
-      showSnackbar('Error adding subtitle', 'error');
+      showSnackbar(`Error adding subtitle: ${error.message}`, 'error');
     }
   };
 
